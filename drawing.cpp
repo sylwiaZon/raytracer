@@ -1,8 +1,13 @@
 #include <iostream>
 #include "geometry.cpp"
+#include "bmp.cpp"
 using namespace std;
 
+const float INFTY=100000;
+
+
 class Drawing{
+protected:
     int width, height;
 public:
     Drawing(int w, int h):width(w),height(h){};
@@ -10,14 +15,118 @@ public:
 };
 
 class RaytracerDrawing:Drawing{
+    JiMP2::BMP picture;
+    ofstream out;
     Point origin;
-    void trace(const Vector &direction){}
-    void render(){
-        cout << "I'm rendering";
+    Vector startDirection;
+    Colour **canvas;
+    Vector basisVector;
+    Colour trace(const Point &origin, const Vector &direction, const Space &space){
+        float t0,t1,t=INFTY;
+        int id=-1;
+        for (int i=0;i<space.getSize();i++){
+            t0=INFTY,t1=INFTY;
+            if(space.getObject(i).intersect(origin,direction,t0,t1)){
+                    //cout <<t0 << " " <<t1<<endl;
+                if(t0<0){
+                    t0=t1;
+                }
+                if(t>t0){
+                    id=i;
+                }
+                t=min(t0,t);
+            }
+        }
+        //cout << t << " ";
+        if(id==-1){
+            return Colour(0,0,0);
+        }
+        Vector d=direction;
+        d.setLenght(t);
+        Point hit=translate(origin,d);
+        Vector normalVector=space.getObject(id).getNormalVector(hit);
+        //cout << normalVector.x << " "<< normalVector.y << " "<< normalVector.z << endl;
+        int transmission;
+        Colour colour=space.getObject(id).colour;
+        for(int i=0;i<space.getSize();i++){
+            if(space.getObject(i).emissionColour.x>0||space.getObject(i).emissionColour.y>0||space.getObject(i).emissionColour.z>0){
+                Vector lightVector(hit,space.getObject(i).center);
+                lightVector.normalize();
+                transmission=1;
+                for(int j=0;j<space.getSize();j++){
+                    if(i!=j&&j!=id){
+                        if(space.getObject(j).intersect(hit,lightVector,t0,t1)){
+                            transmission=0;
+                        }
+                    }
+                }
+               //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
+                //cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
+                Colour c = space.getObject(i).emissionColour;
+                //cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
+                colour=colour+space.getObject(i).emissionColour*transmission*lightVector.dot(normalVector);
+                //cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
+            }
+        }
+        return colour;
+    }
+    void render(const Space &space){
+        float aspectRatio=(float)width/(float)height;
+        float alpha=M_PI*15/180;
+        Point s=translate(origin,startDirection);
+        Vector a= basisVector;
+        a.setLenght(startDirection.getLenght()*tan(alpha));
+        Vector b=a.vectorProduct(startDirection);
+        b.setLenght(a.getLenght()/aspectRatio);
+        Point p;
+        float w=width,h=height;
+        for (int i=0;i<width;i++){
+            for (int j=0;j<height;j++){
+                Vector c=a,d=b;
+                c.setLenght(((w-2*i)/w)*a.getLenght());
+                //cout << ((w-2*i)/w)*a.getLenght() <<" " <<c.getLenght()<< endl;
+                d.setLenght(((h-2*j)/h)*b.getLenght());
+                p=translate(s,c);
+                p=translate(p,d);
+                //cout << p.x << " " << p.y << " " <<p.z <<endl;
+                Vector ray(origin,p);
+                //cout << ray.x << ray.y << ray.z <<" ";
+                ray.normalize();
+                //cout << ray.x << ray.y << ray.z <<endl;
+                //cout << i << " " << j << " " <<ray.x <<" "<<ray.y << " " <<ray.z <<endl;
+                canvas[i][j]=trace(origin,ray,space);
+            }
+        }
     }
 public:
-    RaytracerDrawing(int w, int h,const Point &o):Drawing(w,h),origin(o){};
+    RaytracerDrawing(const int &w,
+                     const int &h,
+                     const Point &o,
+                     const Vector &v,
+                     const Vector &v2):Drawing(w,h),origin(o),startDirection(v),basisVector(v2),picture(JiMP2::BMP(w,h)){
+            canvas=new Colour *[w];
+            for(int i=0;i<w;i++) canvas[i]=new Colour[h];
+            out.open("test.bmp", std::ofstream::binary);
+        }
     void draw(const Space &space){
-        render();
+        render(space);
+        int r,g,b;
+        for(int i=0;i<width;i++){
+            for(int j=0;j<height;j++){
+                if(canvas[i][j].x>0||canvas[i][j].y>0||canvas[i][j].z>0){
+                    //cout << i << " " << j << " " << canvas[i][j].x << " " <<canvas[i][j].y << " " <<canvas[i][j].z << endl;
+                    //cout <<min(255.f,canvas[i][j].x*255)<<min(255.f,canvas[i][j].y*255)<<min(255.f,canvas[i][j].z*255)<<endl;
+                }
+                r=min(255.f,canvas[i][j].x*255);
+                g=min(255.f,canvas[i][j].y*255);
+                b=min(255.f,canvas[i][j].z*255);
+
+                //cout << i<<" "<<j<<" "<< r <<" " << g << " " <<b << endl;
+
+                picture.setPixel(j,i,r,g,b);
+            }
+        }
+        out<<picture;
     }
+
 };

@@ -3,23 +3,15 @@
 using namespace std;
 
 int main(){
-    Point a;
-    Point b(4,5,6);
-    cout << a.x << " " << a.y << " " << a.z << endl ;
-    cout << b.x << " " << b.y << " " << b.z << endl ;
-    Vector c;
-    Vector d(a,b);
-    Vector e(3,5,8);
-
-    cout << c.x << " "<< c.y << " " << c.z << endl;
-    cout << d.x << " " << d.y << " " << d.z << endl ;
-    cout << e.x << " " << e.y << " " << e.z << endl ;
-    e.norm();
-    Vector p=e;
-    cout << p.x << " " << p.y << " " << p.z << endl ;
-
-    Space space(5);
-    space.addObject(Sphere (b,5,Colour()));
-    RaytracerDrawing f(500,500,a);
-    f.draw(space);
+    Point origin(3,0,0);
+    Vector startDirection(-3,0,0);
+    Vector basisVector(0,0,1);
+    Point center(-3,0,0);
+    Sphere sp(center,1,Colour(0.5,0,0),Colour());
+    Sphere light(Point(-1,5,0),2,Colour(0.5,0,0),Colour(3,3,3));
+    Space space(2);
+    space.addObject(sp);
+    space.addObject(light);
+    RaytracerDrawing drawing(500,500,origin,startDirection,basisVector);
+    drawing.draw(space);
 }
