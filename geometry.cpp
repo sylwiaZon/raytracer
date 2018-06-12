@@ -76,13 +76,18 @@ bool Sphere::intersect(const Point &origin,const Vector &direction,float &t0, fl
 Vector Sphere::getNormalVector(const Point &hit){
     return Vector (center,hit);
 }
-Space::Space(int n):objectsCount(0){objects=new Sphere [n];}
-Space::~Space(){delete []objects;}
-void Space::addObject(const Sphere &obj){
+Space::Space(int n):objectsCount(0){objects=new Object* [n];}
+Space::~Space(){
+    /*for(int i=0;i<objectsCount;i++){
+        delete objects[i];
+    }*/
+    delete []objects;
+}
+void Space::addObject(Object *obj){
     objects[objectsCount]=obj;
     objectsCount++;
 }
-Sphere Space::getObject(int i)const {
+Object* Space::getObject(int i)const {
     return objects[i];
 }
 int Space::getSize()const {

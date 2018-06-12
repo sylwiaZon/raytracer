@@ -62,13 +62,13 @@ public:
 };
 
 class Space{
-    Sphere *objects;
+    Object **objects;
     int objectsCount;
 public:
     Space(int n);
     ~Space();
-    void addObject(const Sphere &obj);
-    Sphere getObject(int i) const;
+    void addObject(Object *obj);
+    Object* getObject(int i) const;
     int getSize() const;
 };
 

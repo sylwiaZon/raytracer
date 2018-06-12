@@ -12,10 +12,10 @@ int main(){
     Sphere sp2(Point(-100,1,0),50,Colour(0.2,0.6,0.2),Colour());
     Sphere light(Point(500,-5,-2),2,Colour(0.5,0,0),Colour(3,3,3));
     Space space(4);
-    space.addObject(sp);
-    space.addObject(light);
-    space.addObject(sp1);
-    space.addObject(sp2);
+    space.addObject(&sp);
+    space.addObject(&light);
+    space.addObject(&sp1);
+    space.addObject(&sp2);
     RaytracerDrawing drawing(500,500,origin,startDirection,basisVector);
     drawing.draw(space);
 }

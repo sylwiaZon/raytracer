@@ -27,7 +27,7 @@ class RaytracerDrawing:Drawing{
         int id=-1;
         for (int i=0;i<space.getSize();i++){
             t0=INFTY,t1=INFTY;
-            if(space.getObject(i).intersect(origin,direction,t0,t1)){
+            if(space.getObject(i)->intersect(origin,direction,t0,t1)){
                     //cout <<t0 << " " <<t1<<endl;
                 if(t0<0){
                     t0=t1;
@@ -45,28 +45,28 @@ class RaytracerDrawing:Drawing{
         Vector d=direction;
         d.setLenght(t);
         Point hit=translate(origin,d);
-        Vector normalVector=space.getObject(id).getNormalVector(hit);
+        Vector normalVector=space.getObject(id)->getNormalVector(hit);
         //cout << normalVector.x << " "<< normalVector.y << " "<< normalVector.z << endl;
         int transmission;
         float bias=1e-4;
         Colour colour;
         for(int i=0;i<space.getSize();i++){
-            if(space.getObject(i).emissionColour.x>0||space.getObject(i).emissionColour.y>0||space.getObject(i).emissionColour.z>0){
-                Vector lightVector(hit,space.getObject(i).center);
+            if(space.getObject(i)->emissionColour.x>0||space.getObject(i)->emissionColour.y>0||space.getObject(i)->emissionColour.z>0){
+                Vector lightVector(hit,space.getObject(i)->center);
                 lightVector.normalize();
                 transmission=1;
                 for(int j=0;j<space.getSize();j++){
                     if(i!=j&&j!=id){
-                        if(space.getObject(j).intersect(hit,lightVector,t0,t1)){
+                        if(space.getObject(j)->intersect(hit,lightVector,t0,t1)){
                             transmission=0;
                         }
                     }
                 }
                //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
                 //cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
-                Colour c = space.getObject(id).colour;
+                Colour c = space.getObject(id)->colour;
                 //cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
-                colour=colour + c*space.getObject(i).emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
+                colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
                 //cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
             }
         }
