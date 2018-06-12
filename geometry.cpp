@@ -76,6 +76,32 @@ bool Sphere::intersect(const Point &origin,const Vector &direction,float &t0, fl
 Vector Sphere::getNormalVector(const Point &hit){
     return Vector (center,hit);
 }
+
+Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc):normalVector(v){
+    center=p;
+    colour=col;
+    emissionColour=emc;
+    normalVector.normalize();
+}
+bool Plane::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
+    float a,b,c,d;
+    a=normalVector.x;
+    b=normalVector.y;
+    c=normalVector.z;
+    d=-(center.x*a+center.y*b+center.z*c);
+    float dist;
+    dist=abs(a*origin.x+b*origin.y+c*origin.z)/sqrt(a*a+b*b+c*c);
+    float cosAlpha=normalVector.dot(direction);
+    if(cosAlpha<0){
+        cosAlpha=-cosAlpha;
+    }
+    t0=dist/cosAlpha;
+    return true;
+}
+Vector Plane::getNormalVector(const Point &hit){
+    return normalVector;
+}
+
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}
 Space::~Space(){
     /*for(int i=0;i<objectsCount;i++){

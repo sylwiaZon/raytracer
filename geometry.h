@@ -61,6 +61,15 @@ public:
     virtual Vector getNormalVector(const Point &hit);
 };
 
+class Plane:public Object{
+    Vector normalVector;
+public:
+    Plane();
+    Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc);
+    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
+    virtual Vector getNormalVector(const Point &hit);
+};
+
 class Space{
     Object **objects;
     int objectsCount;
