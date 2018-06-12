@@ -40,6 +40,7 @@ public:
     Colour (float _x,float _y,float _z);
     Colour operator+(const Colour &c);
     Colour operator*(const float &c);
+    Colour operator*(const Colour &c);
 };
 
 class Object{

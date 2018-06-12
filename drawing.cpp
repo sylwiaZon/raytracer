@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "geometry.cpp"
 #include "bmp.cpp"
 using namespace std;
@@ -47,7 +48,8 @@ class RaytracerDrawing:Drawing{
         Vector normalVector=space.getObject(id).getNormalVector(hit);
         //cout << normalVector.x << " "<< normalVector.y << " "<< normalVector.z << endl;
         int transmission;
-        Colour colour=space.getObject(id).colour;
+        float bias=1e-4;
+        Colour colour;
         for(int i=0;i<space.getSize();i++){
             if(space.getObject(i).emissionColour.x>0||space.getObject(i).emissionColour.y>0||space.getObject(i).emissionColour.z>0){
                 Vector lightVector(hit,space.getObject(i).center);
@@ -62,9 +64,9 @@ class RaytracerDrawing:Drawing{
                 }
                //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
                 //cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
-                Colour c = space.getObject(i).emissionColour;
+                Colour c = space.getObject(id).colour;
                 //cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
-                colour=colour+space.getObject(i).emissionColour*transmission*lightVector.dot(normalVector);
+                colour=colour + c*space.getObject(i).emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
                 //cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
             }
         }
@@ -123,7 +125,7 @@ public:
 
                 //cout << i<<" "<<j<<" "<< r <<" " << g << " " <<b << endl;
 
-                picture.setPixel(j,i,r,g,b);
+                picture.setPixel(i,j,r,g,b);
             }
         }
         out<<picture;

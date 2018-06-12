@@ -52,6 +52,9 @@ Colour Colour::operator+(const Colour &c){
 Colour Colour::operator*(const float &c){
     return Colour(x*c,y*c,z*c);
 }
+Colour Colour::operator*(const Colour &c){
+    return Colour(x*c.x,y*c.y,z*c.z);
+}
 Sphere::Sphere(){}
 Sphere::Sphere(const Point &c, const float &rad, const Colour &col,const Colour &emc):radius(rad){
     colour = col;
