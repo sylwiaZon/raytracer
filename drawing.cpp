@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <windows.h>
 #include "geometry.cpp"
 #include "bmp.cpp"
 using namespace std;
@@ -28,6 +29,8 @@ class RaytracerDrawing:Drawing{
         for (int i=0;i<space.getSize();i++){
             t0=INFTY,t1=INFTY;
             if(space.getObject(i)->intersect(origin,direction,t0,t1)){
+                //cout << t0 << " " <<t1 << " " << direction.x << " "<< direction.y<< " "<<direction.z <<endl;
+                //Sleep(1000);
                     //cout <<t0 << " " <<t1<<endl;
                 if(t0<0){
                     t0=t1;
@@ -43,7 +46,7 @@ class RaytracerDrawing:Drawing{
             return Colour(0,0,0);
         }
         Vector d=direction;
-        d.setLenght(t);
+        d.setLength(t);
         Point hit=translate(origin,d);
         Vector normalVector=space.getObject(id)->getNormalVector(hit);
         //cout << normalVector.x << " "<< normalVector.y << " "<< normalVector.z << endl;
@@ -77,17 +80,17 @@ class RaytracerDrawing:Drawing{
         float alpha=M_PI*15/180;
         Point s=translate(origin,startDirection);
         Vector a= basisVector;
-        a.setLenght(startDirection.getLenght()*tan(alpha));
+        a.setLength(startDirection.getLength()*tan(alpha));
         Vector b=a.vectorProduct(startDirection);
-        b.setLenght(a.getLenght()/aspectRatio);
+        b.setLength(a.getLength()/aspectRatio);
         Point p;
         float w=width,h=height;
         for (int i=0;i<width;i++){
             for (int j=0;j<height;j++){
                 Vector c=a,d=b;
-                c.setLenght(((w-2*i)/w)*a.getLenght());
+                c.setLength(((w-2*i)/w)*a.getLength());
                 //cout << ((w-2*i)/w)*a.getLenght() <<" " <<c.getLenght()<< endl;
-                d.setLenght(((h-2*j)/h)*b.getLenght());
+                d.setLength(((h-2*j)/h)*b.getLength());
                 p=translate(s,c);
                 p=translate(p,d);
                 //cout << p.x << " " << p.y << " " <<p.z <<endl;

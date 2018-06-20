@@ -25,13 +25,16 @@ public:
     Vector operator-(const Vector &v);
     Vector operator*(const float &f);
     float dot(const Vector &v);
-    Vector vectorProduct(const Vector & v);
+    Vector vectorProduct(const Vector & v)const;
     void normalize();
-    void setLenght(float d);
-    float getLenght();
+    void setLength(float d);
+    float getLength();
 };
 
 Point translate(const Point &p, const Vector &v);
+float distanceFromPlane(const Point &p1, const float &A,const float &B,const float &C,const float &D);
+bool onPlane(const Point &p, const float &A,const float &B,const float &C,const float &D);
+float pointsDistance(const Point &p1,const Point &p2);
 
 class Colour {
 public:
@@ -66,6 +69,18 @@ class Plane:public Object{
 public:
     Plane();
     Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc);
+    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
+    virtual Vector getNormalVector(const Point &hit);
+};
+
+class Cylinder:public Object{
+    Vector heightVector;
+    Vector baseVector;
+    Point closerPoint(const Vector &v1,const Vector &v2,const Point &origin);
+    float intersectBase(const Point &origin,const Vector &direction);
+public:
+    Cylinder();
+    Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
