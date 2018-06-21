@@ -57,7 +57,7 @@ bool onPlane(const Point &p, const float &A,const float &B,const float &C,const 
     return false;
 }
 float pointsDistance(const Point &p1,const Point &p2){
-    return (p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y)+(p1.z-p2.z)*(p1.z-p2.z);
+    return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y)+(p1.z-p2.z)*(p1.z-p2.z));
 }
 
 
@@ -118,7 +118,7 @@ bool Plane::intersect(const Point &origin,const Vector &direction,float &t0, flo
     Vector cop=direction;
     cop.setLength(t0);
     Point inter=translate(origin,cop);
-    if(a*inter.x+b*inter.y+c*inter.z+d<=eps){
+    if(onPlane(inter,a,b,c,d)){
         return true;
     }
     return false;
@@ -135,17 +135,20 @@ Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colou
 }
 Point Cylinder::closerPoint(const Vector &v1,const Vector &v2, const Point &origin){
     Point p1=translate(center,v1);
+    //cout << "p1 "<<pointsDistance(p1,center) << endl;
     p1=translate(p1,v2);
+    //cout << "p1 dist"<<pointsDistance(p1,center) -baseVector.getLength()<< " ";
     float dist1=pointsDistance(p1,origin);
     Point p2=translate(center,v1);
     Vector v3=v2;
     v3=v3*-1;
-    p2=translate(p1,v3);
-    float dist2=pointsDistance(p1,origin);
-    return dist1<dist2?p1:p2;
+    p2=translate(translate(center,v1),v3);
+    //cout << "p2 dist"<< pointsDistance(p2,center) -baseVector.getLength()<< endl;
+    float dist2=pointsDistance(p2,origin);
+    return abs(dist1)<abs(dist2)?p1:p2;
 }
 bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
-    t0=intersectBase(origin,direction);
+    t0=min(intersectBase(origin,direction,translate(center,heightVector)),intersectBase(origin,direction,center));
     bool intBase=(t0!=100000);
     Vector planeNormalVec=direction.vectorProduct(heightVector);
     float A,B,C,D;
@@ -162,8 +165,18 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     if(!onPlane(translate(center,axisPlane),A,B,C,D)){
         axisPlane=axisPlane*-1;
     }
-    Vector v=planeNormalVec.vectorProduct(heightVector);
+    //cout <<" onpl " <<  onPlane(translate(center,axisPlane),A,B,C,D)<<endl;
+    Vector v=axisPlane.vectorProduct(heightVector);
+    //cout << "assa"<< axisPlane.getLength() <<" "<<baseVector.getLength()<<endl;
+    v.setLength(sqrt((baseVector.getLength()*baseVector.getLength())-(axisPlane.getLength()*axisPlane.getLength())));
+    //cout << "sqrt " <<sqrt((baseVector.getLength()*baseVector.getLength())-(axisPlane.getLength()*axisPlane.getLength()))<< " "<< v.getLength()<<endl;
+    //cout << "odl " << distanceFromPlane(center,A,B,C,D)<<" "<<distanceFromPlane(translate(center,axisPlane),A,B,C,D)
+    //<<" "<<pointsDistance(translate(center,axisPlane),center)<<"  " << axisPlane.getLength() << endl;
     Point lowerPoint=closerPoint(axisPlane,v,origin);
+    //cout<<axisPlane.getLength()*axisPlane.getLength()+v.getLength()*v.getLength()<<" "<<baseVector.getLength()<<"\n";
+    //cout<<pointsDistance(translate(translate(center,axisPlane),v),center)<<" "<< pointsDistance(lowerPoint,center)<<"\n";
+    //Sleep(100);
+    //Sleep(10000);
     Point upperPoint=translate(lowerPoint,heightVector);
     float tA=heightVector.x;
     float tB=heightVector.y;
@@ -176,36 +189,40 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     float ang1=acos(vecLower.dot(direction)/vecLower.getLength());
     float ang2=acos(vecUpper.dot(direction)/vecUpper.getLength());
     float ang3=acos(vecUpper.dot(vecLower)/vecUpper.getLength()/vecLower.getLength());
+    //cout<<ang1<<" "<<ang2<<" "<<ang3<<"angles\n";
     if(abs(ang1+ang2-ang3)>1e-3&&!intBase){
         return false;
     }
+    /*cout << onPlane( lowerPoint,A,B,C,D)<<" "
+        << onPlane( lowerPoint,heightVector.x,heightVector.y,heightVector.z,-heightVector.x*center.x-heightVector.y*center.y-heightVector.z*center.z)
+        <<" " <<pointsDistance(lowerPoint, center)-baseVector.getLength() << " " << pointsDistance(upperPoint,center)-baseVector.getLength() << endl;*/
+    //Sleep(10000);
+
     //ok
     float cosAlpha=vecLower.dot(direction)/vecLower.getLength();
     float alfa=acos(cosAlpha);
     float cosBeta=vecUpper.dot(direction)/vecUpper.getLength();
     float beta=acos(cosBeta);
-
     t0=min(t0,vecUpper.getLength()*vecLower.getLength()*sin(alfa+beta)/(vecLower.getLength()*sin(alfa)+vecUpper.getLength()*sin(beta)));
+    //cout<<t0<<endl;
     return true;
 }
-float Cylinder::intersectBase(const Point &origin,const Vector &direction){
-    float t1=100000,t2=100000,t=0;
-    Plane base1(center,heightVector,colour,Colour());
-    Plane base2(translate(center,heightVector),heightVector,colour,Colour());
+float Cylinder::intersectBase(const Point &origin,const Vector &direction,const Point &cent){
+    float t1=100000,t=0;
+    Plane base1(cent,heightVector*-1,colour,Colour());
     bool res1=base1.intersect(origin,direction,t1,t);
-    bool res2=base2.intersect(origin,direction,t2,t);
-    if(!res1&&!res2){
+    if(!res1){
         return 100000;
     }
-    float ret=min(t1,t2);
-    Vector directionCopy=direction;
-    directionCopy.setLength(ret);
-    Point p=translate(origin,directionCopy);
-    float dist=(p.x-center.x)*(p.x-center.x)+(p.y-center.y)*(p.y-center.y)+(p.z-center.z)*(p.z-center.z);
+    Vector copyDirection=direction;
+    copyDirection.setLength(t1);
+    Point hit=translate(origin,copyDirection);
+    float dist=pointsDistance(hit,cent);
+    //cout << dist << " " << baseVector.getLength() << " " << t1 <<endl;
     if(dist>baseVector.getLength()){
         return 100000;
     }
-    return ret;
+    return t1;
 }
 Vector Cylinder::getNormalVector(const Point &hit){
     Vector vecOP(center,hit);
@@ -213,6 +230,8 @@ Vector Cylinder::getNormalVector(const Point &hit){
     Vector heightVecAxis=heightVector;
     heightVecAxis.setLength(length);
     Point axisPoint=translate(center,heightVecAxis);
+    cout << heightVecAxis.getLength()<<" "<<vecOP.getLength()<<" "<<vecOP.x << " "<<vecOP.y<< " "<<vecOP.z << endl;
+    Sleep(100);
     return Vector(axisPoint,hit);
 }
 

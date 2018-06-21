@@ -58,6 +58,7 @@ class RaytracerDrawing:Drawing{
                 Vector lightVector(hit,space.getObject(i)->center);
                 lightVector.normalize();
                 transmission=1;
+
                 for(int j=0;j<space.getSize();j++){
                     if(i!=j&&j!=id){
                         if(space.getObject(j)->intersect(hit,lightVector,t0,t1)){

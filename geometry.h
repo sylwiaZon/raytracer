@@ -77,7 +77,7 @@ class Cylinder:public Object{
     Vector heightVector;
     Vector baseVector;
     Point closerPoint(const Vector &v1,const Vector &v2,const Point &origin);
-    float intersectBase(const Point &origin,const Vector &direction);
+    float intersectBase(const Point &origin,const Vector &direction,const Point &cent);
 public:
     Cylinder();
     Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em);
