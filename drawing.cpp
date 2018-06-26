@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <windows.h>
 #include "geometry.cpp"
 #include "bmp.cpp"
 using namespace std;

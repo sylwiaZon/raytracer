@@ -24,11 +24,11 @@ public:
     Vector operator+( const Vector &v);
     Vector operator-(const Vector &v);
     Vector operator*(const float &f);
-    float dot(const Vector &v);
-    Vector vectorProduct(const Vector & v)const;
+    float dot(const Vector &v) const;
+    Vector vectorProduct(const Vector & v) const;
     void normalize();
     void setLength(float d);
-    float getLength();
+    float getLength() const;
 };
 
 Point translate(const Point &p, const Vector &v);
@@ -81,6 +81,18 @@ class Cylinder:public Object{
 public:
     Cylinder();
     Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em);
+    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
+    virtual Vector getNormalVector(const Point &hit);
+};
+
+class Cone:public Object {
+	Vector heightVector;
+	float alfa;
+	float height;
+	float intersectBase(const Point &origin,const Vector &direction);
+public:
+    Cone();
+    Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };

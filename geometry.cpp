@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-#include <windows.h>
 #include "geometry.h"
 using namespace std;
 
@@ -19,7 +18,7 @@ Vector Vector::operator-(const Vector &v){
 Vector Vector::operator*(const float &f){
     return Vector(x*f,y*f,z*f);
 }
-float Vector::dot(const Vector &v){
+float Vector::dot(const Vector &v) const{
     return (x*v.x+y*v.y+z*v.z);
 }
 Vector Vector::vectorProduct(const Vector &v)const{
@@ -37,7 +36,7 @@ void Vector::setLength(float d){
     y=y*d;
     z=z*d;
 }
-float Vector::getLength(){
+float Vector::getLength() const{
     return sqrt((*this).dot(*this));
 }
 
@@ -258,6 +257,74 @@ Vector Cylinder::getNormalVector(const Point &hit){
     }
     ret.normalize();
     return ret;
+}
+
+Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,const Colour &col,const Colour &em):heightVector(vh), alfa(a),height(h){
+	center = p;
+    colour=col;
+    emissionColour=em;
+    heightVector.normalize();
+}
+
+float Cone::intersectBase(const Point &origin,const Vector &direction){
+	Vector ch = heightVector;
+	ch.setLength(height);
+	Point center = translate(center,ch);
+	Plane base = Plane(center,heightVector,Colour(),Colour());
+	float t = 10000,t2=10000;
+	if(base.intersect(origin,direction,t,t2)){
+		Vector hv = direction;
+		hv.setLength(t);
+		Point hit = translate(origin,hv);
+		if(pointsDistance(hit,center)<tan(alfa)*height){
+				return t;
+		}else
+			return 10000;
+	}
+	return 10000;
+}
+
+bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
+	float tb = intersectBase(origin,direction);
+	bool intbase = (tb!=10000);
+	//if(intbase)cout<<"inte base!" <<"\n";
+	if(intbase) t1=tb;
+	float cosa = cos(alfa);
+	Vector CO = Vector(center,origin);
+	float a = direction.dot(heightVector)*direction.dot(heightVector)-cosa*cosa;
+	float b = 2*(direction.dot(heightVector)*CO.dot(heightVector)-direction.dot(CO)*cosa*cosa);
+	float c = (CO.dot(heightVector)*CO.dot(heightVector)-CO.dot(CO)*cosa*cosa);
+	float dlt = b*b-4*a*c;
+	bool intsurf = (dlt>=0);
+	if(dlt<0&&!intbase) return false;
+	else if(dlt==0){
+		t0=t1=min(t1,-b/(2*a));
+	}else{
+		t0 = min(t1,(-b-sqrt(dlt))/(2*a));
+		t1 = min(t1,(-b+sqrt(dlt))/(2*a));
+	}
+	Vector vc = direction;
+	vc.setLength(t1);
+	Point hit = translate(origin,vc);
+	if(!intbase&&Vector(center,hit).dot(heightVector)>0)
+		return false;
+	float h = Vector(center,hit).getLength()/cos(alfa);
+	if(h>height&&!intbase)
+		return false;
+	return true;
+}
+Vector Cone::getNormalVector(const Point &hit){
+	Vector CH = Vector(center,hit);
+	if(abs(CH.dot(heightVector)/CH.getLength()-cos(alfa))>1e-3){
+		return heightVector;
+	}
+	float h = CH.getLength()/cos(alfa);
+	Vector cv = heightVector;
+	cv.setLength(h);
+	Point p = translate(center, cv);
+	Vector n = Vector(p,hit);
+	n.normalize();
+	return n;
 }
 
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}
