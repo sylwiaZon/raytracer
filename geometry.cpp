@@ -190,7 +190,8 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     float ang2=acos(vecUpper.dot(direction)/vecUpper.getLength());
     float ang3=acos(vecUpper.dot(vecLower)/vecUpper.getLength()/vecLower.getLength());
     //cout<<ang1<<" "<<ang2<<" "<<ang3<<"angles\n";
-    if(abs(ang1+ang2-ang3)>1e-3&&!intBase){
+    bool angCond = (abs(ang1+ang2-ang3)<=1e-3);
+    if(!angCond&&!intBase){
         return false;
     }
     /*cout << onPlane( lowerPoint,A,B,C,D)<<" "
@@ -203,7 +204,22 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     float alfa=acos(cosAlpha);
     float cosBeta=vecUpper.dot(direction)/vecUpper.getLength();
     float beta=acos(cosBeta);
-    t0=min(t0,vecUpper.getLength()*vecLower.getLength()*sin(alfa+beta)/(vecLower.getLength()*sin(alfa)+vecUpper.getLength()*sin(beta)));
+    if(angCond){
+        t0=(t0,(heightVector.y*(origin.x-lowerPoint.x)-heightVector.x*(origin.y)+heightVector.x*lowerPoint.y)/(heightVector.x*direction.y-heightVector.y*direction.x));
+    }
+    float t7=vecUpper.getLength()*vecLower.getLength()*sin(alfa+beta)/(vecLower.getLength()*sin(alfa)+vecUpper.getLength()*sin(beta));
+    Vector copyDirection=direction;
+    copyDirection.setLength(t0);
+    Point cop=translate(origin,copyDirection);
+    Vector test = heightVector.vectorProduct(Vector(lowerPoint,cop));
+    float a1=pointsDistance(cop,upperPoint);
+    float a2=pointsDistance(cop,lowerPoint);
+    float a3=pointsDistance(upperPoint,lowerPoint);
+    if(angCond){
+    //cout<< test.x<< " "<<test.y<<" "<<test.z<<"\n";
+    //cout << a1 << " "<< a2 << " "<< a1+a2 << " "<<a3 <<" "<<t0<<" "<<t7<<endl;
+    //Sleep(100);
+    }
     //cout<<t0<<endl;
     return true;
 }
@@ -230,9 +246,18 @@ Vector Cylinder::getNormalVector(const Point &hit){
     Vector heightVecAxis=heightVector;
     heightVecAxis.setLength(length);
     Point axisPoint=translate(center,heightVecAxis);
-    cout << heightVecAxis.getLength()<<" "<<vecOP.getLength()<<" "<<vecOP.x << " "<<vecOP.y<< " "<<vecOP.z << endl;
-    Sleep(100);
-    return Vector(axisPoint,hit);
+    Vector ret;
+    if(abs(heightVector.getLength()-heightVecAxis.getLength())>1e-3){
+        //cout << heightVecAxis.getLength()<<" "<<length<<" "<<vecOP.getLength()<<" "<<vecOP.x << " "<<vecOP.y<< " "<<vecOP.z << endl;
+        //Sleep(100);
+        ret = Vector(axisPoint,hit);
+    }else{
+ //           cout<<ret.getLength()<<"podsas";
+
+        ret = heightVector;
+    }
+    ret.normalize();
+    return ret;
 }
 
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}

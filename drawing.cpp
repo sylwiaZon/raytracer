@@ -68,6 +68,7 @@ class RaytracerDrawing:Drawing{
                 }
                //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
                 //cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
+                //cout<<lightVector.dot(normalVector)<<"\n";
                 Colour c = space.getObject(id)->colour;
                 //cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
                 colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
