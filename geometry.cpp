@@ -50,7 +50,7 @@ float distanceFromPlane(const Point &p, const float &A,const float &B,const floa
 }
 bool onPlane(const Point &p, const float &A,const float &B,const float &C,const float &D){
     float eps=1e-3;
-    if((p.x*A+p.y*B+p.z*C+D)<eps){
+    if(abs(p.x*A+p.y*B+p.z*C+D)<eps){
         return true;
     }
     return false;
@@ -269,14 +269,14 @@ Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,co
 float Cone::intersectBase(const Point &origin,const Vector &direction){
 	Vector ch = heightVector;
 	ch.setLength(height);
-	Point center = translate(center,ch);
-	Plane base = Plane(center,heightVector,Colour(),Colour());
+	Point basecenter = translate(center,ch);
+	Plane base = Plane(basecenter,heightVector,Colour(),Colour());
 	float t = 10000,t2=10000;
 	if(base.intersect(origin,direction,t,t2)){
 		Vector hv = direction;
 		hv.setLength(t);
 		Point hit = translate(origin,hv);
-		if(pointsDistance(hit,center)<tan(alfa)*height){
+		if(pointsDistance(hit,basecenter)<tan(alfa)*height){
 				return t;
 		}else
 			return 10000;
@@ -287,8 +287,6 @@ float Cone::intersectBase(const Point &origin,const Vector &direction){
 bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
 	float tb = intersectBase(origin,direction);
 	bool intbase = (tb!=10000);
-	//if(intbase)cout<<"inte base!" <<"\n";
-	if(intbase) t1=tb;
 	float cosa = cos(alfa);
 	Vector CO = Vector(center,origin);
 	float a = direction.dot(heightVector)*direction.dot(heightVector)-cosa*cosa;
@@ -298,32 +296,62 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	bool intsurf = (dlt>=0);
 	if(dlt<0&&!intbase) return false;
 	else if(dlt==0){
-		t0=t1=min(t1,-b/(2*a));
-	}else{
-		t0 = min(t1,(-b-sqrt(dlt))/(2*a));
-		t1 = min(t1,(-b+sqrt(dlt))/(2*a));
+		t0=t1=-b/(2*a);
+	}else if(dlt>0){
+		t0 = (-b-sqrt(dlt))/(2*a);
+		t1 = (-b+sqrt(dlt))/(2*a);
+		if(t1<t0) swap(t0,t1);
 	}
+	
 	Vector vc = direction;
-	vc.setLength(t1);
+	vc.setLength(t0<0?min(tb,t1):t0);
 	Point hit = translate(origin,vc);
-	if(!intbase&&Vector(center,hit).dot(heightVector)>0)
+	
+	if(!intbase&&Vector(center,hit).dot(heightVector)<0)
 		return false;
-	float h = Vector(center,hit).getLength()/cos(alfa);
+	//if((intsurf&&intbase)&&tb<t1)
+	//cout<<a<<" "<<b<<" "<<c<<"\n";
+	if(intbase)
+	cout<<intsurf<<" "<<t0<<" "<<t1<<" "<<tb<<"\n";
+	if(intbase&&!intsurf){
+		t0=tb;
+	//	cout<<"change1"<<"\n";
+	}else if(intbase&&intsurf&&tb<t0){
+		t0=tb;
+		//cout<<"change2"<<"\n";
+
+	}else if(intbase&&intsurf&&tb<t1){
+		t1=tb;
+	//	cout<<"change3"<<"\n";
+
+	}else if(intbase){
+	//	cout<<"no chabge"<<"\n";
+	}
+	if(intbase) cout<<t0<<" "<<t1<<" "<<tb<<"\n";	
+	float h = Vector(center,hit).getLength()*cos(alfa);
 	if(h>height&&!intbase)
 		return false;
 	return true;
 }
 Vector Cone::getNormalVector(const Point &hit){
-	Vector CH = Vector(center,hit);
-	if(abs(CH.dot(heightVector)/CH.getLength()-cos(alfa))>1e-3){
+	Vector hv = heightVector;
+	hv.setLength(height);
+	Point basecenter=translate(center,hv);	
+	float A=hv.x;
+	float B=hv.y;
+	float C=hv.z;
+	float D=-hv.x*basecenter.x-hv.y*basecenter.y-hv.z*basecenter.z;
+	if(onPlane(hit,A,B,C,D)){
 		return heightVector;
-	}
-	float h = CH.getLength()/cos(alfa);
+	}	
+	Vector CH = Vector(center,hit);
+	float h = CH.getLength()*cos(alfa);
 	Vector cv = heightVector;
 	cv.setLength(h);
 	Point p = translate(center, cv);
 	Vector n = Vector(p,hit);
 	n.normalize();
+	//cout<<n.x<<n.y<<n.z<<"\n";
 	return n;
 }
 
