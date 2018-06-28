@@ -22,7 +22,11 @@ class RaytracerDrawing:Drawing{
     Vector startDirection;
     Colour **canvas;
     Vector basisVector;
-    Colour trace(const Point &origin, const Vector &direction, const Space &space){
+    float mix(const float &a, const float &b, const float &mix) 
+	{ 
+		return b * mix + a * (1 - mix); 
+	} 
+    Colour trace(const Point &origin, const Vector &direction, const Space &space,int depth){
         float t0,t1,t=INFTY;
         int id=-1;
         for (int i=0;i<space.getSize();i++){
@@ -49,32 +53,59 @@ class RaytracerDrawing:Drawing{
         Point hit=translate(origin,d);
         Vector normalVector=space.getObject(id)->getNormalVector(hit);
         //cout << normalVector.x << " "<< normalVector.y << " "<< normalVector.z << endl;
-        int transmission;
         float bias=1e-4;
-        Colour colour;
-        for(int i=0;i<space.getSize();i++){
-            if(space.getObject(i)->emissionColour.x>0||space.getObject(i)->emissionColour.y>0||space.getObject(i)->emissionColour.z>0){
-                Vector lightVector(hit,space.getObject(i)->center);
-                lightVector.normalize();
-                transmission=1;
-
-                for(int j=0;j<space.getSize();j++){
-                    if(i!=j&&j!=id){
-                        if(space.getObject(j)->intersect(hit,lightVector,t0,t1)){
-                            transmission=0;
-                        }
-                    }
-                }
-               //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
-                //cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
-                //cout<<lightVector.dot(normalVector)<<"\n";
-                Colour c = space.getObject(id)->colour;
-                //cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
-                colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
-                //cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
-            }
+        Object * cur = space.getObject(id);
+        bool inside = false;
+        if(direction.dot(normalVector)>0){ 
+			normalVector=normalVector*(-1);
+			inside = true;
         }
-        return colour;
+        if((cur->transparency>0||cur->reflection>0)&&depth<5){
+			float facingratio = -direction.dot(normalVector); 
+			float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
+			Vector refldir = direction - normalVector * 2 * direction.dot(normalVector); 
+			refldir.normalize(); 
+			Colour reflection = trace(translate(hit,normalVector * bias), refldir, space, depth + 1); 
+			Colour refraction; 
+			if (cur->transparency) {
+				cout<<direction.x<<" "<<depth<<"\n"; 
+				float ior = 1.001, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface? 
+				float cosi = -normalVector.dot(direction); 
+				float k = 1 - eta * eta * (1 - cosi * cosi); 
+				Vector refrdir = (direction * eta) + (normalVector * (eta *  cosi - sqrt(k))); 
+				refrdir.normalize(); 
+				refraction = trace(translate(hit, normalVector * bias*(-1)), refrdir, space, depth + 1); 
+			} 
+			return ( 
+				reflection * fresneleffect * cur->reflection + 
+				refraction * (1 - fresneleffect) * cur->transparency) * cur->colour; 
+		}else{
+			int transmission;
+			Colour colour;
+			for(int i=0;i<space.getSize();i++){
+				if(space.getObject(i)->emissionColour.x>0||space.getObject(i)->emissionColour.y>0||space.getObject(i)->emissionColour.z>0){
+					Vector lightVector(hit,space.getObject(i)->center);
+					lightVector.normalize();
+					transmission=1;
+					
+					for(int j=0;j<space.getSize();j++){
+						if(i!=j&&j!=id){
+							if(space.getObject(j)->intersect(hit,lightVector,t0,t1)){
+								transmission=0;
+							}
+						}
+					}
+				   //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
+					//cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
+					//cout<<lightVector.dot(normalVector)<<"\n";
+					Colour c = space.getObject(id)->colour;
+					//cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
+					colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
+					//cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
+				}
+			}
+			return colour+cur->emissionColour;
+		}
     }
     void render(const Space &space){
         float aspectRatio=(float)width/(float)height;
@@ -100,7 +131,7 @@ class RaytracerDrawing:Drawing{
                 ray.normalize();
                 //cout << ray.x << ray.y << ray.z <<endl;
                 //cout << i << " " << j << " " <<ray.x <<" "<<ray.y << " " <<ray.z <<endl;
-                canvas[i][j]=trace(origin,ray,space);
+                canvas[i][j]=trace(origin,ray,space,0);
             }
         }
     }
