@@ -59,6 +59,13 @@ float pointsDistance(const Point &p1,const Point &p2){
     return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y)+(p1.z-p2.z)*(p1.z-p2.z));
 }
 
+float pointBetween(const Point &p,const Point &s,const Point &e){
+	if(min(s.x,e.x)<=p.x&&p.x<=max(s.x,e.x)&&
+		min(s.y,e.y)<=p.y&&p.y<=max(s.y,e.y)&&
+		min(s.z,e.z)<=p.z&&p.z<=max(s.z,e.z))
+		return true;
+	return false;	 
+}
 
 Colour::Colour ():x(0),y(0),z(0){};
 Colour::Colour (float _x,float _y,float _z):x(_x),y(_y),z(_z){};
@@ -355,6 +362,63 @@ Vector Cone::getNormalVector(const Point &hit){
 	return n;
 }
 
+
+Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,const Colour &em):a(_a),b(_b){
+	c = a.vectorProduct(b);
+	center = p;
+	colour = col;
+	emissionColour = em;
+}
+
+float Cube::intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c){
+	float aA,aB,aC,aD1,aD2;
+	Point candA = translate(center,a);
+	aA=a.x;aB=a.y;aC=b.y;
+	aD1=-a.x*center.x-a.y*center.y-a.z*center.z;
+	aD2=-a.x*candA.x-a.y*candA.y-a.z*candA.z;
+	if(distanceFromPlane(origin,aA,aB,aC,aD1)<distanceFromPlane(origin,aA,aB,aC,aD2)) candA=center;
+	Plane pl = Plane(candA,a,Colour(),Colour());
+	float t0,t1;
+	bool intct = pl.intersect(origin,direction,t0,t1);
+	if(!intct) return 10000;
+	Vector pointVector = direction;
+	pointVector.setLength(t0);
+	Point S = translate(origin,pointVector);
+	Point p = translate(candA,b);
+	p = translate(p,c);
+	Vector cS(candA,S);
+	float d1 = cS.vectorProduct(b).getLength()/b.getLength();
+	float d2 = cS.vectorProduct(c).getLength()/c.getLength();
+	if(d1<c.getLength()&&d2<b.getLength()) return t0;
+	else return 10000; 
+}
+
+bool Cube::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
+	float ta = intersectOnPlane(origin,direction,a,b,c);
+	float tb = intersectOnPlane(origin,direction,b,a,c);
+	float tc = intersectOnPlane(origin,direction,c,a,b);
+	t0=min(ta,min(tb,tc));
+	if(t0!=10000) return true;
+	return false;
+}
+Vector Cube::getNormalVector(const Point &hit){
+	Vector na = a;
+	Vector nb = b;
+	Vector nc = c;
+	na.normalize();nb.normalize(),nc.normalize();
+	Vector PH = Vector(center,hit);
+	PH.normalize();
+	Point candA = translate(center,a);
+	Vector cPH = Vector(candA,hit);
+	cPH.normalize();
+	if(abs(a.dot(PH)/a.getLength()-1)<1e-3||abs(a.dot(cPH)/a.getLength()-1)<1e-3) return na;
+	PH.normalize();
+	Point candB = translate(center,b);
+	cPH = Vector(candB,hit);
+	cPH.normalize();
+	if(abs(b.dot(PH)/b.getLength()-1)<1e-3||abs(b.dot(cPH)/b.getLength()-1)<1e-3) return nb;
+	return nc;
+}
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}
 Space::~Space(){
     /*for(int i=0;i<objectsCount;i++){

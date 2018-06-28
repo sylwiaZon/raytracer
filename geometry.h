@@ -35,6 +35,7 @@ Point translate(const Point &p, const Vector &v);
 float distanceFromPlane(const Point &p1, const float &A,const float &B,const float &C,const float &D);
 bool onPlane(const Point &p, const float &A,const float &B,const float &C,const float &D);
 float pointsDistance(const Point &p1,const Point &p2);
+float pointBetween(const Point &p,const Point &s,const Point &e);
 
 class Colour {
 public:
@@ -93,6 +94,16 @@ class Cone:public Object {
 public:
     Cone();
     Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em);
+    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
+    virtual Vector getNormalVector(const Point &hit);
+};
+
+class Cube:public Object {
+	Vector a,b,c;
+	float intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c);
+public:
+    Cube();
+    Cube(const Point &p, const Vector &a,const Vector &b,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
