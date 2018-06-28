@@ -64,7 +64,7 @@ float pointBetween(const Point &p,const Point &s,const Point &e){
 		min(s.y,e.y)<=p.y&&p.y<=max(s.y,e.y)&&
 		min(s.z,e.z)<=p.z&&p.z<=max(s.z,e.z))
 		return true;
-	return false;	 
+	return false;
 }
 
 Colour::Colour ():x(0),y(0),z(0){};
@@ -309,7 +309,7 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 		t1 = (-b+sqrt(dlt))/(2*a);
 		if(t1<t0) swap(t0,t1);
 	}
-	
+
 	Vector vc = direction;
 	vc.setLength(t0<0?min(tb,t1):t0);
 	Point hit = translate(origin,vc);
@@ -320,14 +320,14 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 		hit = translate(origin,vc);
 		h = Vector(center,hit).getLength()*cos(alfa);
 	}
-	if(!intbase&&h>height) 
+	if(!intbase&&h>height)
 		return false;
 	if(!intbase&&Vector(center,hit).dot(heightVector)<0)
 		return false;
 	//if((intsurf&&intbase)&&tb<t1)
 	//cout<<a<<" "<<b<<" "<<c<<"\n";
 	if(intbase)
-	cout<<intsurf<<" "<<t0<<" "<<t1<<" "<<tb<<"\n";
+	//cout<<intsurf<<" "<<t0<<" "<<t1<<" "<<tb<<"\n";
 	if(intbase&&!intsurf){
 		t0=tb;
 	//	cout<<"change1"<<"\n";
@@ -343,23 +343,23 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	}else if(intbase){
 	//	cout<<"no chabge"<<"\n";
 	}
-	if(intbase) cout<<t0<<" "<<t1<<" "<<tb<<"\n";	
-	
+
+
 	return true;
 }
 Vector Cone::getNormalVector(const Point &hit){
 	Vector hv = heightVector;
 	hv.setLength(height);
-	Point basecenter=translate(center,hv);	
+	Point basecenter=translate(center,hv);
 	float A=hv.x;
 	float B=hv.y;
 	float C=hv.z;
 	float D=-hv.x*basecenter.x-hv.y*basecenter.y-hv.z*basecenter.z;
 	if(onPlane(hit,A,B,C,D)){
 		return heightVector;
-	}	
+	}
 	Vector CH = Vector(center,hit);
-	float h = CH.getLength()*cos(alfa);
+	float h = CH.getLength()/cos(alfa);
 	Vector cv = heightVector;
 	cv.setLength(h);
 	Point p = translate(center, cv);
@@ -400,7 +400,7 @@ float Cube::intersectOnPlane(const Point &origin,const Vector &direction,const V
 	float d1 = cS.vectorProduct(b).getLength()/b.getLength();
 	float d2 = cS.vectorProduct(c).getLength()/c.getLength();
 	if(d1<c.getLength()&&d2<b.getLength()) return t0;
-	else return 10000; 
+	else return 10000;
 }
 
 bool Cube::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
