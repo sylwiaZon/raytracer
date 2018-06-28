@@ -313,7 +313,15 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	Vector vc = direction;
 	vc.setLength(t0<0?min(tb,t1):t0);
 	Point hit = translate(origin,vc);
-	
+	float h = Vector(center,hit).getLength()*cos(alfa);
+	if(h>height&&t0>=0){
+		t0 = t1;
+		vc.setLength(t0);
+		hit = translate(origin,vc);
+		h = Vector(center,hit).getLength()*cos(alfa);
+	}
+	if(!intbase&&h>height) 
+		return false;
 	if(!intbase&&Vector(center,hit).dot(heightVector)<0)
 		return false;
 	//if((intsurf&&intbase)&&tb<t1)
@@ -324,6 +332,7 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 		t0=tb;
 	//	cout<<"change1"<<"\n";
 	}else if(intbase&&intsurf&&tb<t0){
+		t1=t0;
 		t0=tb;
 		//cout<<"change2"<<"\n";
 
@@ -335,9 +344,7 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	//	cout<<"no chabge"<<"\n";
 	}
 	if(intbase) cout<<t0<<" "<<t1<<" "<<tb<<"\n";	
-	float h = Vector(center,hit).getLength()*cos(alfa);
-	if(h>height&&!intbase)
-		return false;
+	
 	return true;
 }
 Vector Cone::getNormalVector(const Point &hit){
@@ -365,6 +372,9 @@ Vector Cone::getNormalVector(const Point &hit){
 
 Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,const Colour &em):a(_a),b(_b){
 	c = a.vectorProduct(b);
+	a.normalize();
+	b.normalize();
+	c.normalize();
 	center = p;
 	colour = col;
 	emissionColour = em;
@@ -402,22 +412,17 @@ bool Cube::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	return false;
 }
 Vector Cube::getNormalVector(const Point &hit){
-	Vector na = a;
-	Vector nb = b;
-	Vector nc = c;
-	na.normalize();nb.normalize(),nc.normalize();
-	Vector PH = Vector(center,hit);
-	PH.normalize();
 	Point candA = translate(center,a);
-	Vector cPH = Vector(candA,hit);
-	cPH.normalize();
-	if(abs(a.dot(PH)/a.getLength()-1)<1e-3||abs(a.dot(cPH)/a.getLength()-1)<1e-3) return na;
-	PH.normalize();
+	float A = a.x,B=a.y,C=a.z;
+	float D1=-a.x*center.x-a.y*center.y-a.z*center.z;
+	float D2=-a.x*candA.x-a.y*candA.y-a.z*candA.z;
+	if(onPlane(hit,A,B,C,D1)||onPlane(hit,A,B,C,D2)) return a;
 	Point candB = translate(center,b);
-	cPH = Vector(candB,hit);
-	cPH.normalize();
-	if(abs(b.dot(PH)/b.getLength()-1)<1e-3||abs(b.dot(cPH)/b.getLength()-1)<1e-3) return nb;
-	return nc;
+	A = b.x,B=b.y,C=b.z;
+	D1=-b.x*center.x-b.y*center.y-b.z*center.z;
+	D2=-b.x*candB.x-b.y*candB.y-b.z*candB.z;
+	if(onPlane(hit,A,B,C,D1)||onPlane(hit,A,B,C,D2)) return b;
+	return c;
 }
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}
 Space::~Space(){
