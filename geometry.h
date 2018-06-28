@@ -21,9 +21,9 @@ public:
     Vector();
     Vector(float _x, float _y, float _z);
     Vector(Point start, Point ending);
-    Vector operator+( const Vector &v);
-    Vector operator-(const Vector &v);
-    Vector operator*(const float &f);
+    Vector operator+( const Vector &v) const;
+    Vector operator-(const Vector &v) const;
+    Vector operator*(const float &f) const;
     float dot(const Vector &v) const;
     Vector vectorProduct(const Vector & v) const;
     void normalize();
@@ -52,6 +52,7 @@ public:
     Colour colour;
     Point center;
     Colour emissionColour;
+    float transparency,reflection;
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1){};
     virtual Vector getNormalVector(const Point &hit){};
 };
@@ -60,7 +61,7 @@ class Sphere:public Object{
 public:
     float radius;
     Sphere();
-    Sphere(const Point &c, const float &rad, const Colour &col,const Colour &emc);
+    Sphere(const Point &c, const float &rad, const Colour &col,const Colour &emc,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -69,7 +70,7 @@ class Plane:public Object{
     Vector normalVector;
 public:
     Plane();
-    Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc);
+    Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -81,7 +82,7 @@ class Cylinder:public Object{
     float intersectBase(const Point &origin,const Vector &direction,const Point &cent);
 public:
     Cylinder();
-    Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em);
+    Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -93,7 +94,7 @@ class Cone:public Object {
 	float intersectBase(const Point &origin,const Vector &direction);
 public:
     Cone();
-    Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em);
+    Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -103,7 +104,7 @@ class Cube:public Object {
 	float intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c);
 public:
     Cube();
-    Cube(const Point &p, const Vector &a,const Vector &b,const Colour &col,const Colour &em);
+    Cube(const Point &p, const Vector &a,const Vector &b,const Colour &col,const Colour &em,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };

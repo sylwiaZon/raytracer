@@ -9,13 +9,13 @@ Point::Point(float _x, float _y, float _z):x(_x),y(_y),z(_z){};
 Vector::Vector():x(0),y(0),z(0){};
 Vector::Vector(float _x, float _y, float _z):x(_x),y(_y),z(_z){};
 Vector::Vector(Point start, Point ending):x(ending.x-start.x),y(ending.y-start.y),z(ending.z-start.z){};
-Vector Vector::operator+( const Vector &v){
+Vector Vector::operator+( const Vector &v) const{
     return Vector(x+v.x,y+v.y,z+v.z);
 }
-Vector Vector::operator-(const Vector &v){
+Vector Vector::operator-(const Vector &v) const{
     return Vector(x-v.x,y-v.y,z-v.z);
 }
-Vector Vector::operator*(const float &f){
+Vector Vector::operator*(const float &f) const{
     return Vector(x*f,y*f,z*f);
 }
 float Vector::dot(const Vector &v) const{
@@ -79,10 +79,12 @@ Colour Colour::operator*(const Colour &c){
     return Colour(x*c.x,y*c.y,z*c.z);
 }
 Sphere::Sphere(){}
-Sphere::Sphere(const Point &c, const float &rad, const Colour &col,const Colour &emc):radius(rad){
+Sphere::Sphere(const Point &c, const float &rad, const Colour &col,const Colour &emc,const float & tran,const float & relf):radius(rad){
     colour = col;
     center=c;
     emissionColour=emc;
+    transparency = tran;
+    reflection = relf;
 };
 bool Sphere::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
     Vector l(origin,center);
@@ -100,11 +102,13 @@ Vector Sphere::getNormalVector(const Point &hit){
     return Vector (center,hit);
 }
 
-Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc):normalVector(v){
+Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc,const float & tran,const float & relf):normalVector(v){
     center=p;
     colour=col;
     emissionColour=emc;
     normalVector.normalize();
+    transparency = tran;
+    reflection = relf;
 }
 bool Plane::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
     float a,b,c,d;
@@ -134,10 +138,12 @@ Vector Plane::getNormalVector(const Point &hit){
     return normalVector;
 }
 
-Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em):heightVector(vh),baseVector(vp){
+Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em,const float & tran,const float & relf):heightVector(vh),baseVector(vp){
     center=p;
     colour=col;
     emissionColour=em;
+    transparency = tran;
+    reflection = relf;
 }
 Point Cylinder::closerPoint(const Vector &v1,const Vector &v2, const Point &origin){
     Point p1=translate(center,v1);
@@ -231,7 +237,7 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
 }
 float Cylinder::intersectBase(const Point &origin,const Vector &direction,const Point &cent){
     float t1=100000,t=0;
-    Plane base1(cent,heightVector*-1,colour,Colour());
+    Plane base1(cent,heightVector*-1,colour,Colour(),0,0);
     bool res1=base1.intersect(origin,direction,t1,t);
     if(!res1){
         return 100000;
@@ -266,18 +272,20 @@ Vector Cylinder::getNormalVector(const Point &hit){
     return ret;
 }
 
-Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,const Colour &col,const Colour &em):heightVector(vh), alfa(a),height(h){
+Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,const Colour &col,const Colour &em,const float & tran,const float & relf):heightVector(vh), alfa(a),height(h){
 	center = p;
     colour=col;
     emissionColour=em;
     heightVector.normalize();
+    transparency = tran;
+    reflection = relf;
 }
 
 float Cone::intersectBase(const Point &origin,const Vector &direction){
 	Vector ch = heightVector;
 	ch.setLength(height);
 	Point basecenter = translate(center,ch);
-	Plane base = Plane(basecenter,heightVector,Colour(),Colour());
+	Plane base = Plane(basecenter,heightVector,Colour(),Colour(),0,0);
 	float t = 10000,t2=10000;
 	if(base.intersect(origin,direction,t,t2)){
 		Vector hv = direction;
@@ -370,7 +378,7 @@ Vector Cone::getNormalVector(const Point &hit){
 }
 
 
-Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,const Colour &em):a(_a),b(_b){
+Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,const Colour &em,const float & tran,const float & relf):a(_a),b(_b){
 	c = a.vectorProduct(b);
 	a.normalize();
 	b.normalize();
@@ -378,6 +386,8 @@ Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,c
 	center = p;
 	colour = col;
 	emissionColour = em;
+    transparency = tran;
+    reflection = relf;
 }
 
 float Cube::intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c){
@@ -387,7 +397,7 @@ float Cube::intersectOnPlane(const Point &origin,const Vector &direction,const V
 	aD1=-a.x*center.x-a.y*center.y-a.z*center.z;
 	aD2=-a.x*candA.x-a.y*candA.y-a.z*candA.z;
 	if(distanceFromPlane(origin,aA,aB,aC,aD1)<distanceFromPlane(origin,aA,aB,aC,aD2)) candA=center;
-	Plane pl = Plane(candA,a,Colour(),Colour());
+	Plane pl = Plane(candA,a,Colour(),Colour(),0,0);
 	float t0,t1;
 	bool intct = pl.intersect(origin,direction,t0,t1);
 	if(!intct) return 10000;
