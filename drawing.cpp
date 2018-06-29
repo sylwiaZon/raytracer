@@ -2,7 +2,6 @@
 #include <fstream>
 #include "geometry.cpp"
 #include "bmp.cpp"
-#include<windows.h>
 using namespace std;
 
 const float INFTY=100000;

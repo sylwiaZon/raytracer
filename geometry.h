@@ -101,10 +101,11 @@ public:
 
 class Cube:public Object {
 	Vector a,b,c;
-	float intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c);
+	float height;
+	float intersectOnPlane(const Point &origin,const Vector &direction,Vector a,Vector b,Vector c);
 public:
     Cube();
-    Cube(const Point &p, const Vector &a,const Vector &b,const Colour &col,const Colour &em,const float & tran,const float & relf);
+    Cube(const Point &p, const Vector &a,const Vector &b,float h,const Colour &col,const Colour &em,const float & tran,const float & relf);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };

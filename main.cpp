@@ -17,7 +17,7 @@ int main(){
     Cylinder cyl2(Point(-10,0,-3),Vector(0,3,0),Vector(1,0,0),Colour (1,0,1),Colour(),0,0);
     Cone con(Point(-2.5,-2.8,0.8),Vector(-1,2,3),M_PI/16,1,Colour (0,1,0),Colour(),0,0);
     Cone con2(Point(-2.5,-2.8,3.1),Vector(-1,2,-3),M_PI/16,1,Colour (0,1,0),Colour(),0,0);
-    Cube cub(Point(-20,2,-1),Vector(1,0,1),Vector(0,-1,0),Colour(0.98, 0.45, 0.43),Colour(),0,0);
+    Cube cub(Point(-20,-3,-1),Vector(1,0,-1),Vector(0,1,0),2,Colour(0.98, 0.45, 0.43),Colour(),0,0);
     Sphere sp4(Point(-20,2,-1),1,Colour(0.5,0.8,0.2),Colour(),0,0);
     Space space(15);
     space.addObject(&pl);

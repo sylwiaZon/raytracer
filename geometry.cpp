@@ -378,7 +378,7 @@ Vector Cone::getNormalVector(const Point &hit){
 }
 
 
-Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,const Colour &em,const float & tran,const float & relf):a(_a),b(_b){
+Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,float h,const Colour &col,const Colour &em,const float & tran,const float & relf):a(_a),b(_b),height(h){
 	c = a.vectorProduct(b);
 	a.normalize();
 	b.normalize();
@@ -390,7 +390,10 @@ Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,const Colour &col,c
     reflection = relf;
 }
 
-float Cube::intersectOnPlane(const Point &origin,const Vector &direction,const Vector &a,const Vector &b,const Vector &c){
+float Cube::intersectOnPlane(const Point &origin,const Vector &direction, Vector a, Vector b, Vector c){
+	a.setLength(height);
+	b.setLength(height);
+	c.setLength(height);
 	float aA,aB,aC,aD1,aD2;
 	Point candA = translate(center,a);
 	aA=a.x;aB=a.y;aC=b.y;
@@ -422,15 +425,19 @@ bool Cube::intersect(const Point &origin,const Vector &direction,float &t0, floa
 	return false;
 }
 Vector Cube::getNormalVector(const Point &hit){
-	Point candA = translate(center,a);
-	float A = a.x,B=a.y,C=a.z;
-	float D1=-a.x*center.x-a.y*center.y-a.z*center.z;
-	float D2=-a.x*candA.x-a.y*candA.y-a.z*candA.z;
+	Vector aa = a;
+	aa.setLength(height);
+	Point candA = translate(center,aa);
+	float A = aa.x,B=aa.y,C=aa.z;
+	float D1=-aa.x*center.x-aa.y*center.y-aa.z*center.z;
+	float D2=-aa.x*candA.x-aa.y*candA.y-aa.z*candA.z;
 	if(onPlane(hit,A,B,C,D1)||onPlane(hit,A,B,C,D2)) return a;
-	Point candB = translate(center,b);
-	A = b.x,B=b.y,C=b.z;
-	D1=-b.x*center.x-b.y*center.y-b.z*center.z;
-	D2=-b.x*candB.x-b.y*candB.y-b.z*candB.z;
+	Vector bb = b;
+	bb.setLength(height);
+	Point candB = translate(center,bb);
+	A = bb.x,B=bb.y,C=bb.z;
+	D1=-bb.x*center.x-bb.y*center.y-bb.z*center.z;
+	D2=-bb.x*candB.x-bb.y*candB.y-bb.z*candB.z;
 	if(onPlane(hit,A,B,C,D1)||onPlane(hit,A,B,C,D2)) return b;
 	return c;
 }
