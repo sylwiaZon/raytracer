@@ -99,7 +99,9 @@ bool Sphere::intersect(const Point &origin,const Vector &direction,float &t0, fl
 }
 
 Vector Sphere::getNormalVector(const Point &hit){
-    return Vector (center,hit);
+    Vector v = Vector (center,hit);
+    v.normalize();
+    return v;
 }
 
 Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc,const float & tran,const float & relf):normalVector(v){

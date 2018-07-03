@@ -35,6 +35,8 @@ class RaytracerDrawing:Drawing{
                 //cout << t0 << " " <<t1 << " " << direction.x << " "<< direction.y<< " "<<direction.z <<endl;
                 //Sleep(1000);
                     //cout <<t0 << " " <<t1<<endl;
+				//cout<<t0<<" "<<t1<<"\n";
+                
                 if(t0<0){
                     t0=t1;
                 }
@@ -44,7 +46,7 @@ class RaytracerDrawing:Drawing{
                 t=min(t0,t);
             }
         }
-        //cout << t << " ";
+        //cout << t << "tttttttt\n ";
         if(id==-1){
             return Colour(0,0,0);
         }
@@ -61,15 +63,20 @@ class RaytracerDrawing:Drawing{
 			inside = true;
         }
         if((cur->transparency>0||cur->reflection>0)&&depth<5){
+			//cout<<normalVector.x<<" "<<normalVector.y<<" "<<normalVector.z<<"\n";
 			float facingratio = -direction.dot(normalVector);
 			float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
 			Vector refldir = direction - normalVector * 2 * direction.dot(normalVector);
 			refldir.normalize();
 			Colour reflection = trace(translate(hit,normalVector * bias), refldir, space, depth + 1);
+			//cout<<fresneleffect<<" "<<reflection.x<<" "<<reflection.y<<" "<<reflection.z<<"ccc\n";
+			//Colour res = reflection*cur->colour*fresneleffect;
+			//cout<<fresneleffect<<" "<<res.x<<" "<<res.y<<" "<<res.z<<"ccc22222\n";
+
 			Colour refraction;
 			if (cur->transparency) {
 				//cout<<direction.x<<" "<<depth<<"\n";
-				float ior = 1.001, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
+				float ior = 1.1, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
 				float cosi = -normalVector.dot(direction);
 				float k = 1 - eta * eta * (1 - cosi * cosi);
 				Vector refrdir = (direction * eta) + (normalVector * (eta *  cosi - sqrt(k)));
@@ -77,7 +84,7 @@ class RaytracerDrawing:Drawing{
 				refraction = trace(translate(hit, normalVector * bias*(-1)), refrdir, space, depth + 1);
 			}
 			return (
-				reflection * fresneleffect +
+				reflection * fresneleffect * cur ->reflection+
 				refraction * (1 - fresneleffect) * cur->transparency) * cur->colour;
 		}else{
 			int transmission;
@@ -85,21 +92,24 @@ class RaytracerDrawing:Drawing{
 			for(int i=0;i<space.getSize();i++){
 				if(space.getObject(i)->emissionColour.x>0||space.getObject(i)->emissionColour.y>0||space.getObject(i)->emissionColour.z>0){
 					Vector lightVector(hit,space.getObject(i)->center);
+					transmission=1;					
 					lightVector.normalize();
-					transmission=1;
-
 					for(int j=0;j<space.getSize();j++){
 						if(i!=j&&j!=id){
 							if(space.getObject(j)->intersect(hit,lightVector,t0,t1)){
-								transmission=0;
+								if(t0<0) t0=t1;
+								if(pointsDistance(hit,space.getObject(i)->center)>t0)
+									transmission=0;
 							}
 						}
 					}
 				   //out<<colour.x<<" "<<colour.y<<" "<<colour.z<<" stary\n";
 					//cout<<transmission<<" "<<lightVector.dot(normalVector)<<"\n";
-					//cout<<lightVector.dot(normalVector)<<"\n";
+					//cout<<normalVector.x<<normalVector.y<<normalVector.z<<"lll22ll\n";
+					//cout<<lightVector.x<<lightVector.y<<lightVector.z<<"lllll\n";
 					Colour c = space.getObject(id)->colour;
-					//cout<<c.x<<" "<<c.y<<" "<<c.z<<"\n";
+					Colour rese = c*space.getObject(i)->emissionColour*max(0.f,lightVector.dot(normalVector));
+					//cout<<rese.x<<" "<<rese.y<<" "<<rese.z<<"\n";
 					colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
 					//cout<<colour.x<<" "<<colour.y<<" "<<colour.z<<"\n";
 				}
