@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include "drawing.h"
-#include "bmp.h"
 using namespace std;
 
 Drawing::Drawing(int w, int h):width(w),height(h){};

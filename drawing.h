@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <fstream>
-#include "geometry.h"
 #include "bmp.h"
 using namespace std;
 
