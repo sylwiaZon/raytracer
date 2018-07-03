@@ -412,7 +412,7 @@ float Cube::intersectOnPlane(const Point &origin,const Vector &direction, Vector
 	Vector cS(candA,S);
 	float d1 = cS.vectorProduct(b).getLength()/b.getLength();
 	float d2 = cS.vectorProduct(c).getLength()/c.getLength();
-	if(d1<c.getLength()&&d2<b.getLength()) return t0;
+	if(d1<c.getLength()&&d2<b.getLength()&&cS.dot(b)>0&&cS.dot(c)>0) return t0;
 	else return 10000;
 }
 
