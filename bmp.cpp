@@ -201,24 +201,3 @@ std::ostream& operator<<(std::ostream& os, const BMP& bmp) {
 	return os;
 }
 }
-
-/*int main() {
-
-	const uint16_t imgWidth = 800;
-	const uint16_t imgHeight = 600;
-
-	JiMP2::BMP bmp(imgWidth, imgHeight);
-
-    bmp.drawRectangle(300,300,100,100,255,0,0);
-    bmp.drawLine(100,100,500,500,0,0,0);
-    bmp.drawPartOfWheel(500,600,50,0,270,0,0,0);
-    bmp.drawWheel(400,100,50,100,10,100);
-    bmp.drawElipse(200,200,50,100,10,10,50);
-    bmp.drawPolygon(400,200,5,50,20,25,60);
-	std::ofstream outfile("test.bmp", std::ofstream::binary);
-	outfile << bmp;
-
-	std::cout << "end." << std::endl;
-
-	return 0;
-}*/

@@ -53,8 +53,8 @@ public:
     Point center;
     Colour emissionColour;
     float transparency,reflection;
-    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1){};
-    virtual Vector getNormalVector(const Point &hit){};
+    virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1)=0;
+    virtual Vector getNormalVector(const Point &hit)=0;
 };
 
 class Sphere:public Object{

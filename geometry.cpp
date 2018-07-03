@@ -147,15 +147,12 @@ Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colou
 }
 Point Cylinder::closerPoint(const Vector &v1,const Vector &v2, const Point &origin){
     Point p1=translate(center,v1);
-    //cout << "p1 "<<pointsDistance(p1,center) << endl;
     p1=translate(p1,v2);
-    //cout << "p1 dist"<<pointsDistance(p1,center) -baseVector.getLength()<< " ";
     float dist1=pointsDistance(p1,origin);
     Point p2=translate(center,v1);
     Vector v3=v2;
     v3=v3*-1;
     p2=translate(translate(center,v1),v3);
-    //cout << "p2 dist"<< pointsDistance(p2,center) -baseVector.getLength()<< endl;
     float dist2=pointsDistance(p2,origin);
     return abs(dist1)<abs(dist2)?p1:p2;
 }
@@ -177,41 +174,24 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     if(!onPlane(translate(center,axisPlane),A,B,C,D)){
         axisPlane=axisPlane*-1;
     }
-    //cout <<" onpl " <<  onPlane(translate(center,axisPlane),A,B,C,D)<<endl;
     Vector v=axisPlane.vectorProduct(heightVector);
-    //cout << "assa"<< axisPlane.getLength() <<" "<<baseVector.getLength()<<endl;
     v.setLength(sqrt((baseVector.getLength()*baseVector.getLength())-(axisPlane.getLength()*axisPlane.getLength())));
-    //cout << "sqrt " <<sqrt((baseVector.getLength()*baseVector.getLength())-(axisPlane.getLength()*axisPlane.getLength()))<< " "<< v.getLength()<<endl;
-    //cout << "odl " << distanceFromPlane(center,A,B,C,D)<<" "<<distanceFromPlane(translate(center,axisPlane),A,B,C,D)
-    //<<" "<<pointsDistance(translate(center,axisPlane),center)<<"  " << axisPlane.getLength() << endl;
     Point lowerPoint=closerPoint(axisPlane,v,origin);
-    //cout<<axisPlane.getLength()*axisPlane.getLength()+v.getLength()*v.getLength()<<" "<<baseVector.getLength()<<"\n";
-    //cout<<pointsDistance(translate(translate(center,axisPlane),v),center)<<" "<< pointsDistance(lowerPoint,center)<<"\n";
-    //Sleep(100);
-    //Sleep(10000);
     Point upperPoint=translate(lowerPoint,heightVector);
     float tA=heightVector.x;
     float tB=heightVector.y;
     float tC=heightVector.z;
     float tD=-(heightVector.x*center.x+heightVector.y*center.y+heightVector.z*center.z);
-    //cout<< "odl"<<distanceFromPlane(lowerPoint,tA,tB,tC,tD)<<' '<< distanceFromPlane(upperPoint,tA,tB,tC,tD)<<"\n";
-//ok
     Vector vecLower(origin,lowerPoint);
     Vector vecUpper(origin,upperPoint);
     float ang1=acos(vecLower.dot(direction)/vecLower.getLength());
     float ang2=acos(vecUpper.dot(direction)/vecUpper.getLength());
     float ang3=acos(vecUpper.dot(vecLower)/vecUpper.getLength()/vecLower.getLength());
-    //cout<<ang1<<" "<<ang2<<" "<<ang3<<"angles\n";
     bool angCond = (abs(ang1+ang2-ang3)<=1e-3);
     if(!angCond&&!intBase){
         return false;
     }
-    /*cout << onPlane( lowerPoint,A,B,C,D)<<" "
-        << onPlane( lowerPoint,heightVector.x,heightVector.y,heightVector.z,-heightVector.x*center.x-heightVector.y*center.y-heightVector.z*center.z)
-        <<" " <<pointsDistance(lowerPoint, center)-baseVector.getLength() << " " << pointsDistance(upperPoint,center)-baseVector.getLength() << endl;*/
-    //Sleep(10000);
 
-    //ok
     float cosAlpha=vecLower.dot(direction)/vecLower.getLength();
     float alfa=acos(cosAlpha);
     float cosBeta=vecUpper.dot(direction)/vecUpper.getLength();
@@ -227,12 +207,6 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     float a1=pointsDistance(cop,upperPoint);
     float a2=pointsDistance(cop,lowerPoint);
     float a3=pointsDistance(upperPoint,lowerPoint);
-    if(angCond){
-    //cout<< test.x<< " "<<test.y<<" "<<test.z<<"\n";
-    //cout << a1 << " "<< a2 << " "<< a1+a2 << " "<<a3 <<" "<<t0<<" "<<t7<<endl;
-    //Sleep(100);
-    }
-    //cout<<t0<<endl;
     return true;
 }
 float Cylinder::intersectBase(const Point &origin,const Vector &direction,const Point &cent){
@@ -246,7 +220,6 @@ float Cylinder::intersectBase(const Point &origin,const Vector &direction,const 
     copyDirection.setLength(t1);
     Point hit=translate(origin,copyDirection);
     float dist=pointsDistance(hit,cent);
-    //cout << dist << " " << baseVector.getLength() << " " << t1 <<endl;
     if(dist>baseVector.getLength()){
         return 100000;
     }
@@ -260,12 +233,8 @@ Vector Cylinder::getNormalVector(const Point &hit){
     Point axisPoint=translate(center,heightVecAxis);
     Vector ret;
     if(abs(heightVector.getLength()-heightVecAxis.getLength())>1e-3){
-        //cout << heightVecAxis.getLength()<<" "<<length<<" "<<vecOP.getLength()<<" "<<vecOP.x << " "<<vecOP.y<< " "<<vecOP.z << endl;
-        //Sleep(100);
         ret = Vector(axisPoint,hit);
     }else{
- //           cout<<ret.getLength()<<"podsas";
-
         ret = heightVector;
     }
     ret.normalize();
@@ -332,27 +301,15 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 		return false;
 	if(!intbase&&Vector(center,hit).dot(heightVector)<0)
 		return false;
-	//if((intsurf&&intbase)&&tb<t1)
-	//cout<<a<<" "<<b<<" "<<c<<"\n";
 	if(intbase)
-	//cout<<intsurf<<" "<<t0<<" "<<t1<<" "<<tb<<"\n";
 	if(intbase&&!intsurf){
 		t0=tb;
-	//	cout<<"change1"<<"\n";
 	}else if(intbase&&intsurf&&tb<t0){
 		t1=t0;
 		t0=tb;
-		//cout<<"change2"<<"\n";
-
 	}else if(intbase&&intsurf&&tb<t1){
 		t1=tb;
-	//	cout<<"change3"<<"\n";
-
-	}else if(intbase){
-	//	cout<<"no chabge"<<"\n";
 	}
-
-
 	return true;
 }
 Vector Cone::getNormalVector(const Point &hit){
@@ -373,7 +330,6 @@ Vector Cone::getNormalVector(const Point &hit){
 	Point p = translate(center, cv);
 	Vector n = Vector(p,hit);
 	n.normalize();
-	//cout<<n.x<<n.y<<n.z<<"\n";
 	return n;
 }
 
@@ -443,9 +399,6 @@ Vector Cube::getNormalVector(const Point &hit){
 }
 Space::Space(int n):objectsCount(0){objects=new Object* [n];}
 Space::~Space(){
-    /*for(int i=0;i<objectsCount;i++){
-        delete objects[i];
-    }*/
     delete []objects;
 }
 void Space::addObject(Object *obj){
