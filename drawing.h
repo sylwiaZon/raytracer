@@ -20,6 +20,7 @@ public:
 
 class RaytracerDrawing:Drawing{
     JiMP2::BMP picture;
+    float angle;
     ofstream out;
     Point origin;
     Vector startDirection;
@@ -33,7 +34,8 @@ public:
                      const int &h,
                      const Point &o,
                      const Vector &v,
-                     const Vector &v2);
+                     const Vector &v2,
+                     const float &ang);
     void draw(const Space &space);
 };
 
