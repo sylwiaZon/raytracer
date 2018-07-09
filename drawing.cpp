@@ -62,7 +62,7 @@ Colour RaytracerDrawing::trace(const Point &origin, const Vector &direction, con
 		Colour refraction;
 		if (cur->transparency) {
 			//cout<<direction.x<<" "<<depth<<"\n";
-			float ior = 1.1, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
+			float ior = 1.01, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
 			float cosi = -normalVector.dot(direction);
 			float k = 1 - eta * eta * (1 - cosi * cosi);
 			Vector refrdir = (direction * eta) + (normalVector * (eta *  cosi - sqrt(k)));
