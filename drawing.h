@@ -15,7 +15,7 @@ protected:
     int width, height;
 public:
     Drawing(int w, int h);
-    virtual void draw(const Space &space);
+    virtual void draw(const Space &space)=0;
 };
 
 class RaytracerDrawing:Drawing{

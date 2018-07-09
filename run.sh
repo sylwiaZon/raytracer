@@ -1,3 +1,3 @@
-g++ main.cpp geometry.cpp drawing.cpp -o rt && ./rt && xdg-open test.bmp
+g++ geometry.cpp drawing.cpp bmp.cpp main.cpp -o rt && ./rt && xdg-open test.bmp
 rm rt
 
