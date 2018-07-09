@@ -5,6 +5,7 @@
 using namespace std;
 
 
+
 int main(int argc, char ** argv){
 	Space space(100);
 	if(argc>1){
