@@ -59,14 +59,6 @@ float pointsDistance(const Point &p1,const Point &p2){
     return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y)+(p1.z-p2.z)*(p1.z-p2.z));
 }
 
-float pointBetween(const Point &p,const Point &s,const Point &e){
-	if(min(s.x,e.x)<=p.x&&p.x<=max(s.x,e.x)&&
-		min(s.y,e.y)<=p.y&&p.y<=max(s.y,e.y)&&
-		min(s.z,e.z)<=p.z&&p.z<=max(s.z,e.z))
-		return true;
-	return false;
-}
-
 Colour::Colour ():x(0),y(0),z(0){};
 Colour::Colour (float _x,float _y,float _z):x(_x),y(_y),z(_z){};
 Colour Colour::operator+(const Colour &c){
@@ -104,13 +96,13 @@ Vector Sphere::getNormalVector(const Point &hit){
     return v;
 }
 
-Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc,const float & tran,const float & relf):normalVector(v){
+Plane::Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc):normalVector(v){
     center=p;
     colour=col;
     emissionColour=emc;
     normalVector.normalize();
-    transparency = tran;
-    reflection = relf;
+    transparency = 0;
+    reflection = 0;
 }
 bool Plane::intersect(const Point &origin,const Vector &direction,float &t0, float &t1){
     float a,b,c,d;
@@ -121,7 +113,6 @@ bool Plane::intersect(const Point &origin,const Vector &direction,float &t0, flo
     d=-(center.x*a+center.y*b+center.z*c);
     float dist;
     dist=abs(a*origin.x+b*origin.y+c*origin.z+d)/sqrt(a*a+b*b+c*c);
-    //cout << "dist " << dist << " "<<a << " " <<b << " " <<c << " " <<d<< endl;
     float cosAlpha=normalVector.dot(direction);
     if(cosAlpha<0){
         cosAlpha=-cosAlpha;
@@ -140,12 +131,12 @@ Vector Plane::getNormalVector(const Point &hit){
     return normalVector;
 }
 
-Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em,const float & tran,const float & relf):heightVector(vh),baseVector(vp){
+Cylinder::Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em):heightVector(vh),baseVector(vp){
     center=p;
     colour=col;
     emissionColour=em;
-    transparency = tran;
-    reflection = relf;
+    transparency = 0;
+    reflection = 0;
 }
 Point Cylinder::closerPoint(const Vector &v1,const Vector &v2, const Point &origin){
     Point p1=translate(center,v1);
@@ -180,10 +171,6 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     v.setLength(sqrt((baseVector.getLength()*baseVector.getLength())-(axisPlane.getLength()*axisPlane.getLength())));
     Point lowerPoint=closerPoint(axisPlane,v,origin);
     Point upperPoint=translate(lowerPoint,heightVector);
-    float tA=heightVector.x;
-    float tB=heightVector.y;
-    float tC=heightVector.z;
-    float tD=-(heightVector.x*center.x+heightVector.y*center.y+heightVector.z*center.z);
     Vector vecLower(origin,lowerPoint);
     Vector vecUpper(origin,upperPoint);
     float ang1=acos(vecLower.dot(direction)/vecLower.getLength());
@@ -201,19 +188,11 @@ bool Cylinder::intersect(const Point &origin,const Vector &direction,float &t0, 
     if(angCond){
         t0=(t0,(heightVector.y*(origin.x-lowerPoint.x)-heightVector.x*(origin.y)+heightVector.x*lowerPoint.y)/(heightVector.x*direction.y-heightVector.y*direction.x));
     }
-    float t7=vecUpper.getLength()*vecLower.getLength()*sin(alfa+beta)/(vecLower.getLength()*sin(alfa)+vecUpper.getLength()*sin(beta));
-    Vector copyDirection=direction;
-    copyDirection.setLength(t0);
-    Point cop=translate(origin,copyDirection);
-    Vector test = heightVector.vectorProduct(Vector(lowerPoint,cop));
-    float a1=pointsDistance(cop,upperPoint);
-    float a2=pointsDistance(cop,lowerPoint);
-    float a3=pointsDistance(upperPoint,lowerPoint);
     return true;
 }
 float Cylinder::intersectBase(const Point &origin,const Vector &direction,const Point &cent){
     float t1=100000,t=0;
-    Plane base1(cent,heightVector*-1,colour,Colour(),0,0);
+    Plane base1(cent,heightVector*-1,colour,Colour());
     bool res1=base1.intersect(origin,direction,t1,t);
     if(!res1){
         return 100000;
@@ -243,20 +222,20 @@ Vector Cylinder::getNormalVector(const Point &hit){
     return ret;
 }
 
-Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,const Colour &col,const Colour &em,const float & tran,const float & relf):heightVector(vh), alfa(a),height(h){
+Cone::Cone(const Point &p, const Vector &vh, const float & a, const float & h,const Colour &col,const Colour &em):heightVector(vh), alfa(a),height(h){
 	center = p;
     colour=col;
     emissionColour=em;
     heightVector.normalize();
-    transparency = tran;
-    reflection = relf;
+    transparency = 0;
+    reflection = 0;
 }
 
 float Cone::intersectBase(const Point &origin,const Vector &direction){
 	Vector ch = heightVector;
 	ch.setLength(height);
 	Point basecenter = translate(center,ch);
-	Plane base = Plane(basecenter,heightVector,Colour(),Colour(),0,0);
+	Plane base = Plane(basecenter,heightVector,Colour(),Colour());
 	float t = 10000,t2=10000;
 	if(base.intersect(origin,direction,t,t2)){
 		Vector hv = direction;
@@ -303,7 +282,6 @@ bool Cone::intersect(const Point &origin,const Vector &direction,float &t0, floa
 		return false;
 	if(!intbase&&Vector(center,hit).dot(heightVector)<0)
 		return false;
-	if(intbase)
 	if(intbase&&!intsurf){
 		t0=tb;
 	}else if(intbase&&intsurf&&tb<t0){
@@ -336,7 +314,7 @@ Vector Cone::getNormalVector(const Point &hit){
 }
 
 
-Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,float h,const Colour &col,const Colour &em,const float & tran,const float & relf):a(_a),b(_b),height(h){
+Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,float h,const Colour &col,const Colour &em):a(_a),b(_b),height(h){
 	c = a.vectorProduct(b);
 	a.normalize();
 	b.normalize();
@@ -344,8 +322,8 @@ Cube::Cube(const Point &p, const Vector &_a,const Vector &_b,float h,const Colou
 	center = p;
 	colour = col;
 	emissionColour = em;
-    transparency = tran;
-    reflection = relf;
+    transparency = 0;
+    reflection = 0;
 }
 
 float Cube::intersectOnPlane(const Point &origin,const Vector &direction, Vector a, Vector b, Vector c){
@@ -358,7 +336,7 @@ float Cube::intersectOnPlane(const Point &origin,const Vector &direction, Vector
 	aD1=-a.x*center.x-a.y*center.y-a.z*center.z;
 	aD2=-a.x*candA.x-a.y*candA.y-a.z*candA.z;
 	if(distanceFromPlane(origin,aA,aB,aC,aD1)<distanceFromPlane(origin,aA,aB,aC,aD2)) candA=center;
-	Plane pl = Plane(candA,a,Colour(),Colour(),0,0);
+	Plane pl = Plane(candA,a,Colour(),Colour());
 	float t0,t1;
 	bool intct = pl.intersect(origin,direction,t0,t1);
 	if(!intct) return 10000;

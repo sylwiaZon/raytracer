@@ -34,7 +34,7 @@ Colour RaytracerDrawing::trace(const Point &origin, const Vector &direction, con
     d.setLength(t);
     Point hit=translate(origin,d);
     Vector normalVector=space.getObject(id)->getNormalVector(hit);
-    float bias=1e-4;
+    float bias=1e-3;
     Object * cur = space.getObject(id);
     bool inside = false;
     if(direction.dot(normalVector)>0){
@@ -43,29 +43,29 @@ Colour RaytracerDrawing::trace(const Point &origin, const Vector &direction, con
     }
     if((cur->transparency>0||cur->reflection>0)&&depth<5){
 		float facingratio = -direction.dot(normalVector);
-		float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
+		float effect = mix(pow(1 - facingratio, 3), 1, 0.1);
 		Vector refldir = direction - normalVector * 2 * direction.dot(normalVector);
 		refldir.normalize();
 		Colour reflection = trace(translate(hit,normalVector * bias), refldir, space, depth + 1);
 
 		Colour refraction;
 		if (cur->transparency) {
-			float ior = 1.01, eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
+			float ratio = 1.01, e = (inside) ? ratio : 1 / ratio;
 			float cosi = -normalVector.dot(direction);
-			float k = 1 - eta * eta * (1 - cosi * cosi);
-			Vector refrdir = (direction * eta) + (normalVector * (eta *  cosi - sqrt(k)));
+			float k = 1 - e * e * (1 - cosi * cosi);
+			Vector refrdir = (direction * e) + (normalVector * (e *  cosi - sqrt(k)));
 			refrdir.normalize();
 			refraction = trace(translate(hit, normalVector * bias*(-1)), refrdir, space, depth + 1);
 		}
 		return (
-			reflection * fresneleffect * cur ->reflection+
-			refraction * (1 - fresneleffect) * cur->transparency) * cur->colour;
+			reflection * effect * cur->reflection +
+			refraction * (1 - effect) * cur->transparency) * cur->colour;
 	}else{
 		int transmission;
 		Colour colour;
 		for(int i=0;i<space.getSize();i++){
 			if(space.getObject(i)->emissionColour.x>0||space.getObject(i)->emissionColour.y>0||space.getObject(i)->emissionColour.z>0){
-				Vector lightVector(hit,space.getObject(i)->center);
+				Vector lightVector(translate(hit,normalVector*bias),space.getObject(i)->center);
 				transmission=1;					
 				lightVector.normalize();
 				for(int j=0;j<space.getSize();j++){
@@ -78,7 +78,6 @@ Colour RaytracerDrawing::trace(const Point &origin, const Vector &direction, con
 					}
 				}
 				Colour c = space.getObject(id)->colour;
-				Colour rese = c*space.getObject(i)->emissionColour*max(0.f,lightVector.dot(normalVector));
 				colour=colour + c*space.getObject(i)->emissionColour*transmission*max(0.f,lightVector.dot(normalVector));
 			}
 		}

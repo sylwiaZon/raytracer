@@ -72,7 +72,7 @@ void create (Space &space, fstream &file){
 				file >> line[9];
 				file >> line[10];
 				file >> line[11];
-				obj=new Cone(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),M_PI/line[7],line[8],Colour (line[9],line[10],line[11]),Colour(),0,0);
+				obj=new Cone(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),M_PI/line[7],line[8],Colour (line[9],line[10],line[11]),Colour());
 				space.addObject(obj);  
 				break;
 			case 'u':
@@ -89,7 +89,7 @@ void create (Space &space, fstream &file){
 				file >> line[11];
 				file >> line[12];
 				file >> line[13];
-				obj=new Cube(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Vector(line[7],line[8],line[9]),line[10],Colour(line[11], line[12],line[13]),Colour(),0,0);
+				obj=new Cube(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Vector(line[7],line[8],line[9]),line[10],Colour(line[11], line[12],line[13]),Colour());
 				space.addObject(obj);  
 				break;
 			case 'y':
@@ -105,7 +105,7 @@ void create (Space &space, fstream &file){
 				file >> line[10];
 				file >> line[11];
 				file >> line[12];
-				obj=new Cylinder(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Vector(line[7],line[8],line[9]),Colour (line[10],line[11],line[12]),Colour(),0,0);
+				obj=new Cylinder(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Vector(line[7],line[8],line[9]),Colour (line[10],line[11],line[12]),Colour());
 				space.addObject(obj);  
 				break;
 			case 'p':
@@ -118,7 +118,7 @@ void create (Space &space, fstream &file){
 				file >> line[7];
 				file >> line[8];
 				file >> line[9];
-				obj=new Plane(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Colour(line[7],line[8],line[9]),Colour(),0,0);
+				obj=new Plane(Point(line[1],line[2],line[3]),Vector(line[4],line[5],line[6]),Colour(line[7],line[8],line[9]),Colour());
 				space.addObject(obj);  
 				break;
 			case 'l':
@@ -135,9 +135,8 @@ void create (Space &space, fstream &file){
 				obj=new Sphere(Point (line[1],line[2],line[3]),line[4],Colour(line[5],line[6],line[7]),Colour(line[8],line[9],line[10]),0,0);
 				space.addObject(obj);  
 				break;
+
 			default: 
-				cout << "undefined command";
-				is=0;
 				break;
 		}
 		t='0';

@@ -35,7 +35,6 @@ Point translate(const Point &p, const Vector &v);
 float distanceFromPlane(const Point &p1, const float &A,const float &B,const float &C,const float &D);
 bool onPlane(const Point &p, const float &A,const float &B,const float &C,const float &D);
 float pointsDistance(const Point &p1,const Point &p2);
-float pointBetween(const Point &p,const Point &s,const Point &e);
 
 class Colour {
 public:
@@ -70,7 +69,7 @@ class Plane:public Object{
     Vector normalVector;
 public:
     Plane();
-    Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc,const float & tran,const float & relf);
+    Plane(const Point &p,const Vector &v,const Colour &col,const Colour &emc);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -82,7 +81,7 @@ class Cylinder:public Object{
     float intersectBase(const Point &origin,const Vector &direction,const Point &cent);
 public:
     Cylinder();
-    Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em,const float & tran,const float & relf);
+    Cylinder(const Point &p, const Vector &vh,const Vector &vp,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -94,7 +93,7 @@ class Cone:public Object {
 	float intersectBase(const Point &origin,const Vector &direction);
 public:
     Cone();
-    Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em,const float & tran,const float & relf);
+    Cone(const Point &p, const Vector &vh,const float& a,const float&h,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };
@@ -105,7 +104,7 @@ class Cube:public Object {
 	float intersectOnPlane(const Point &origin,const Vector &direction,Vector a,Vector b,Vector c);
 public:
     Cube();
-    Cube(const Point &p, const Vector &a,const Vector &b,float h,const Colour &col,const Colour &em,const float & tran,const float & relf);
+    Cube(const Point &p, const Vector &a,const Vector &b,float h,const Colour &col,const Colour &em);
     virtual bool intersect(const Point &origin,const Vector &direction,float &t0, float &t1);
     virtual Vector getNormalVector(const Point &hit);
 };

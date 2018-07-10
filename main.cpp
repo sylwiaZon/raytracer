@@ -10,11 +10,9 @@ int main(int argc, char ** argv){
 	Space space(100);
 	if(argc>1){
 		fstream file;
-		file.open(argv[1], std::ios::in);
-		cout<<"before good";
+		file.open("scene.txt", std::ios::in);
      	if (file.good())
         {
-        	cout<<"after good";
         	create(space,file);
         	file.close();
        	}
